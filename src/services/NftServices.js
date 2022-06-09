@@ -2,6 +2,7 @@
 const axios = require('axios').default;
 
 export async function createNft(data) {
+    
     axios.post('/api/nft', {
         body: data,
     })

@@ -1,5 +1,7 @@
 import React, { Component } from "react";
+import { Buffer } from "buffer";
 import { createNft } from '../services/NftServices';
+const ipfs = require('ipfs-http-client');
 
 class DisplayImage extends Component {
     constructor(props) {
@@ -19,20 +21,49 @@ class DisplayImage extends Component {
 
     handleChange = event => {
         // console.log(event.target.name)
+
         this.setState({ ...this.state, [event.target.name]: event.target.value })
-        if (event.target.files && event.target.files[0]) {
-            let img = event.target.files[0];
-            this.setState({
-                image: URL.createObjectURL(img)
-            });
-        }
+
+
     };
 
-    onSubmit = event => {
-        event.preventDefault()
-        console.log(this.state)
-        createNft(this.state)
+
+
+    addImage = async (file) => {
+        // connect to local ipfs node
+        const client = ipfs.create("http://localhost:5001")
+        return await client.add(file).then(result => {
+            console.log(result)
+            return (result)
+        })
+
     }
+
+    addMetaData = async (data) => {
+        // connect to local ipfs node
+        const client = ipfs.create("http://localhost:5001")
+        return await client.add({ content: Buffer.from(JSON.stringify(data)) }).then(result => {
+            console.log(result)
+            return (result)
+        })
+
+    }
+
+    onSubmit = async event => {
+        event.preventDefault()
+        const file = event.target[0].files[0]
+        this.addImage(file).then(result => {
+            console.log('result')
+            console.log(result)
+            this.setState({ image: result })
+            console.log(this.state)
+            createNft(this.state)
+        })
+        // await this.addMetaData(this.state)
+
+
+    }
+
 
     render() {
         return (
